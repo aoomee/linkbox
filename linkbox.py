@@ -28,7 +28,7 @@ import urllib.request
 import uuid
 from contextlib import contextmanager
 
-VERSION = '1.0.2'
+VERSION = '1.0.3'
 CORE_VERSION = '1.14.2'
 METHODS = ('aes-256-gcm', 'chacha20-ietf-poly1305', 'aes-128-gcm')
 ROOT = Path('/etc/linkbox')
@@ -550,7 +550,7 @@ class UI:
         while True:
             prompt = f'  {label}' + (f' [{default}]' if default is not None else '') + '：'
             if secret:
-                value = getpass.getpass(prompt, stream=self.tty)
+                value = getpass.getpass(prompt, stream=sys.stderr)
             else:
                 print(prompt, end='', flush=True)
                 line = self.tty.readline()
