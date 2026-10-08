@@ -28,7 +28,7 @@ import urllib.request
 import uuid
 from contextlib import contextmanager
 
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 CORE_VERSION = '1.14.2'
 METHODS = ('aes-256-gcm', 'chacha20-ietf-poly1305', 'aes-128-gcm')
 ROOT = Path('/etc/linkbox')
@@ -534,7 +534,9 @@ class UI:
     def __init__(self, store):
         self.store = store
         self.color = sys.stdout.isatty() and not os.environ.get('NO_COLOR')
-        self.tty = open('/dev/tty', 'r+')
+        # The installer already verifies and passes the controlling terminal as stdin.
+        # Reopening /dev/tty can fail in restricted Alpine/OpenRC containers.
+        self.tty = sys.stdin
 
     def line(self, value=''):
         print('  ' + value)
@@ -938,5 +940,6 @@ if __name__ == '__main__':
         print('\n  已退出。')
         sys.exit(130)
     except (Error, OSError, ValueError, KeyError) as exc:
-        print('\n  错误 · ' + (str(exc) if isinstance(exc, Error) else '本地文件或系统操作异常，请检查安装与配置。'), file=sys.stderr)
+        detail = str(exc) if isinstance(exc, Error) else f'{type(exc).__name__}: {exc}'
+        print('\n  错误 · ' + detail, file=sys.stderr)
         sys.exit(1)
