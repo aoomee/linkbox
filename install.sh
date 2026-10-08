@@ -25,6 +25,9 @@ printf '\n  LINKBOX 1.0.2\n  正在准备…\n'
 case "$ID" in
     alpine) quiet apk add --no-cache python3 curl ca-certificates ;;
     *) quiet env DEBIAN_FRONTEND=noninteractive apt-get update
+       if ! command -v wget >/dev/null 2>&1 && ! command -v curl >/dev/null 2>&1; then
+           quiet env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends wget ca-certificates
+       fi
        quiet env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3 curl ca-certificates ;;
 esac
 # This pinned digest is updated together with the manager in each release.

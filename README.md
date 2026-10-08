@@ -10,16 +10,26 @@
 
 ## 一键安装
 
-两台机器都在 root SSH 终端执行同一条命令：
+两台机器都在 root SSH 终端执行。命令会自动选用已有的 wget 或 curl；若 Debian / Ubuntu 两者都没有，会先用 apt-get 安装 wget 和 CA 证书，再下载安装器：
 
 ```sh
-wget -qO- https://raw.githubusercontent.com/aoomee/linkbox/main/install.sh | sh
-```
-
-有 curl 也可以：
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/aoomee/linkbox/main/install.sh | sh
+(
+  installer_url='https://raw.githubusercontent.com/aoomee/linkbox/61757eebd047c7d2c416483deae97ca743437f68/install.sh'
+  installer_file=$(mktemp) || exit 1
+  trap 'rm -f "$installer_file"' 0 HUP INT TERM
+  if command -v wget >/dev/null 2>&1; then
+    wget -qO "$installer_file" "$installer_url" || exit 1
+  elif command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$installer_url" -o "$installer_file" || exit 1
+  elif command -v apt-get >/dev/null 2>&1; then
+    apt-get update && apt-get install -y wget ca-certificates || exit 1
+    wget -qO "$installer_file" "$installer_url" || exit 1
+  else
+    echo '找不到 wget 或 curl；此系统也没有 apt-get 可自动安装。' >&2
+    exit 1
+  fi
+  sh "$installer_file"
+)
 ```
 
 以后直接输入：
@@ -28,7 +38,7 @@ curl -fsSL https://raw.githubusercontent.com/aoomee/linkbox/main/install.sh | sh
 lb
 ```
 
-需要 Debian 11+、Ubuntu 20.04+（运行 systemd）或 Alpine（完整 OpenRC），Python 3.8+ 由安装器自动安装。支持 x86_64 / aarch64 / armv7l。普通没有 init 的容器不是安装目标。精简 Debian/Ubuntu 若没有 wget 或 curl，先运行 `apt-get update && apt-get install -y wget ca-certificates`。
+需要 Debian 11+、Ubuntu 20.04+（运行 systemd）或 Alpine（完整 OpenRC），Python 3.8+ 由安装器自动安装。支持 x86_64 / aarch64 / armv7l。普通没有 init 的容器不是安装目标。
 
 ## 两步连接
 
