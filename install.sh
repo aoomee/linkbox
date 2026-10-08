@@ -21,7 +21,7 @@ quiet() {
     tail -n 8 "$TASK_TMP/install.log" >&2
     fail '安装未完成，原因见上方。'
 }
-printf '\n  LINKBOX 1.0.2\n  正在准备…\n'
+printf '\n  LINKBOX 1.0.3\n  正在准备…\n'
 case "$ID" in
     alpine) quiet apk add --no-cache python3 curl ca-certificates ;;
     *) quiet env DEBIAN_FRONTEND=noninteractive apt-get update
@@ -31,8 +31,8 @@ case "$ID" in
        quiet env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3 curl ca-certificates ;;
 esac
 # This pinned digest is updated together with the manager in each release.
-MANAGER_SHA=c8d6abfbe2b923e33c097d1da3fe24a9141ccefa6fa8bf795d0b7cd06fa56d11
-MANAGER_URL=https://raw.githubusercontent.com/aoomee/linkbox/0b172203d983895c078cdbf37ab5ceb6648fff94/linkbox.py
+MANAGER_SHA=71770326c448145cedc7fe97007dd33b203a9000f8bae29ce0a4f11d0e0aa319
+MANAGER_URL=https://raw.githubusercontent.com/aoomee/linkbox/4a758578761aa2ef81d3c4bfd162356b4e4d5e28/linkbox.py
 download_manager() {
     attempt=0
     for mode in auto http1 ipv4 ipv6; do
