@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="title desc">
+  <title id="title">LINKBOX</title>
+  <desc id="desc">电脑通过 VLESS Reality 连接直连机，再通过 Shadowsocks 连接落地机。</desc>
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#fff" stroke-opacity=".035"/>
+    </pattern>
+    <marker id="arrow-cyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#68d9d0"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#f1b76d"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="340" rx="22" fill="#142332"/>
+  <rect width="1200" height="340" rx="22" fill="url(#grid)"/>
+
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans CJK SC',sans-serif">
+    <g transform="translate(72 58)" fill="none" stroke="#68d9d0" stroke-width="2.5" stroke-linecap="round">
+      <path d="M2 14h15M27 14h15M17 14a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z"/>
+      <circle cx="2" cy="14" r="2" fill="#68d9d0" stroke="none"/>
+      <circle cx="42" cy="14" r="2" fill="#68d9d0" stroke="none"/>
+    </g>
+    <text x="128" y="78" fill="#b6c6d2" font-size="15" font-weight="650" letter-spacing="3">NETWORK ROUTE</text>
+    <text x="72" y="158" fill="#f3f6f8" font-size="58" font-weight="720" letter-spacing="5">LINKBOX</text>
+    <text x="75" y="207" fill="#dbe4e9" font-size="24" font-weight="520">让入口与落地，简单连起来。</text>
+    <text x="76" y="250" fill="#9badba" font-size="15">VLESS Reality 接入 · Shadowsocks 出站</text>
+  </g>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M625 174h98" stroke="#68d9d0" stroke-width="2.5" marker-end="url(#arrow-cyan)"/>
+    <path d="M817 174h95" stroke="#f1b76d" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+    <path d="M1007 174h86" stroke="#b6c6d2" stroke-width="2" marker-end="url(#arrow-cyan)"/>
+
+    <rect x="562" y="145" width="50" height="39" rx="5" stroke="#dbe4e9" stroke-width="2"/>
+    <path d="M555 192h64l-5 6h-54z" fill="#dbe4e9" stroke="none"/>
+
+    <rect x="744" y="143" width="52" height="20" rx="4" stroke="#68d9d0" stroke-width="2"/>
+    <rect x="744" y="170" width="52" height="20" rx="4" stroke="#68d9d0" stroke-width="2"/>
+    <circle cx="754" cy="153" r="2" fill="#68d9d0" stroke="none"/>
+    <circle cx="754" cy="180" r="2" fill="#68d9d0" stroke="none"/>
+
+    <rect x="927" y="143" width="52" height="20" rx="4" stroke="#f1b76d" stroke-width="2"/>
+    <rect x="927" y="170" width="52" height="20" rx="4" stroke="#f1b76d" stroke-width="2"/>
+    <circle cx="937" cy="153" r="2" fill="#f1b76d" stroke="none"/>
+    <circle cx="937" cy="180" r="2" fill="#f1b76d" stroke="none"/>
+
+    <circle cx="1123" cy="168" r="23" stroke="#dbe4e9" stroke-width="2"/>
+    <path d="M1101 168h44M1123 145c11 12 11 34 0 46M1123 145c-11 12-11 34 0 46" stroke="#dbe4e9" stroke-width="1.5"/>
+  </g>
+
+  <g text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans CJK SC',sans-serif">
+    <text x="587" y="228" fill="#dbe4e9" font-size="14" font-weight="600">电脑</text>
+    <text x="692" y="144" fill="#68d9d0" font-size="12" font-weight="650" letter-spacing=".5">VLESS REALITY</text>
+    <text x="770" y="228" fill="#dbe4e9" font-size="14" font-weight="600">直连机</text>
+    <text x="865" y="144" fill="#f1b76d" font-size="12" font-weight="650" letter-spacing="1">SHADOWSOCKS</text>
+    <text x="953" y="228" fill="#dbe4e9" font-size="14" font-weight="600">落地机</text>
+    <text x="1123" y="228" fill="#dbe4e9" font-size="14" font-weight="600">网络</text>
+  </g>
+</svg>
