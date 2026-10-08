@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LinkBox: small, independent VLESS Reality / Shadowsocks manager."""
+"""LINKBOX: small, independent VLESS Reality / Shadowsocks manager."""
 from __future__ import annotations
 
 import base64
@@ -28,7 +28,7 @@ import urllib.request
 import uuid
 from contextlib import contextmanager
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 CORE_VERSION = '1.14.2'
 METHODS = ('aes-256-gcm', 'chacha20-ietf-poly1305', 'aes-128-gcm')
 ROOT = Path('/etc/linkbox')
@@ -99,7 +99,7 @@ def unb64(value):
 def endpoint(value):
     required = {'v', 'protocol', 'name', 'server', 'port', 'method', 'password'}
     if not isinstance(value, dict) or set(value) != required:
-        raise Error('Token 字段不正确；只接受 LinkBox Token 或标准 SS 链接。')
+        raise Error('Token 字段不正确；只接受 LINKBOX Token 或标准 SS 链接。')
     if type(value['v']) is not int or value['v'] != 1 or value['protocol'] != 'ss':
         raise Error('Token 版本或协议不受支持。')
     if value['method'] not in METHODS:
@@ -328,7 +328,7 @@ class System:
     def definition(self):
         if self.manager == 'systemd':
             return '''[Unit]
-Description=LinkBox VLESS and Shadowsocks
+Description=LINKBOX VLESS and Shadowsocks
 Wants=network-online.target
 After=network-online.target
 StartLimitIntervalSec=0
@@ -345,7 +345,7 @@ StandardError=journal
 WantedBy=multi-user.target
 '''
         return '''#!/sbin/openrc-run
-description="LinkBox VLESS and Shadowsocks"
+description="LINKBOX VLESS and Shadowsocks"
 command="/usr/local/lib/linkbox/sing-box"
 command_args="run -c /etc/linkbox/current/config.json"
 supervisor="supervise-daemon"
@@ -500,7 +500,7 @@ def locked():
         try:
             fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
-            raise Error('另一个 LinkBox 窗口正在操作，请先退出它。')
+            raise Error('另一个 LINKBOX 窗口正在操作，请先退出它。')
         yield
 
 
@@ -745,8 +745,8 @@ class UI:
             raise Error('没有这个选项。')
 
     def uninstall(self):
-        self.title('卸载 LinkBox')
-        if self.ask('删除全部 LinkBox 节点和密钥？输入 DELETE 确认') != 'DELETE':
+        self.title('卸载 LINKBOX')
+        if self.ask('删除全部 LINKBOX 节点和密钥？输入 DELETE 确认') != 'DELETE':
             return
         if self.store.system.active(): self.store.system.stop()
         self.store.system.enable(False)
@@ -758,7 +758,7 @@ class UI:
 
     def menu(self):
         while True:
-            self.title('LinkBox  ·  ' + VERSION)
+            self.title('LINKBOX  ·  ' + VERSION)
             self.line('1  节点管理')
             self.line('2  进阶功能')
             self.line('0  退出')
@@ -796,6 +796,50 @@ class UI:
             self.pause()
 
 
+def download(url, destination):
+    """Bounded HTTPS retries, including curl 56 on older distro curl versions."""
+    destination = Path(destination)
+    attempts = [
+        ('自动连接', []),
+        ('HTTP/1.1', ['--http1.1']),
+        ('HTTP/1.1 · IPv4', ['--http1.1', '-4']),
+        ('HTTP/1.1 · IPv6', ['--http1.1', '-6']),
+    ]
+    failures = []
+    for number, (label, flags) in enumerate(attempts, 1):
+        destination.unlink(missing_ok=True)
+        if number > 1:
+            print(f'  下载重试 {number}/{len(attempts)} · {label}', flush=True)
+            time.sleep(1)
+        args = ['curl', '-q', '-fsSL', '--proto', '=https', '--proto-redir', '=https',
+                '--connect-timeout', '15', '--max-time', '180',
+                *flags, url, '-o', str(destination)]
+        code = None
+        try:
+            result = subprocess.run(args, stdin=subprocess.DEVNULL, capture_output=True,
+                                    text=True, errors='replace', timeout=190)
+            code = result.returncode
+            if code == 0:
+                return
+            detail = result.stderr.strip() or '没有返回错误详情'
+            # Keep public-download diagnostics readable, without terminal control codes.
+            detail = ''.join(c for c in detail if c.isprintable() or c == '\n')[-800:]
+            reason = f'curl {code}: {detail}'
+        except subprocess.TimeoutExpired:
+            reason = '下载超时（190 秒）'
+        except OSError as exc:
+            destination.unlink(missing_ok=True)
+            raise Error(f'无法启动下载工具 curl（{type(exc).__name__}），请检查 curl 是否安装。') from exc
+        destination.unlink(missing_ok=True)
+        failures.append(f'{label} · {reason}')
+        # Certificate/local write errors do not benefit from changing network families.
+        if code in (23, 26, 60, 77):
+            break
+    raise Error('核心下载失败，安装未完成。\n  ' + '\n  '.join(failures) +
+                '\n  下载地址：' + url +
+                '\n  请检查这台机器到 GitHub 下载站的连接后重新运行安装命令。')
+
+
 def fetch_core(directory, distro, machine=None):
     architecture = {'x86_64': 'amd64', 'amd64': 'amd64', 'aarch64': 'arm64', 'arm64': 'arm64', 'armv7l': 'armv7'}.get(machine or platform.machine())
     if not architecture:
@@ -805,13 +849,13 @@ def fetch_core(directory, distro, machine=None):
     directory = Path(directory)
     archive = directory / 'core.tar.gz'
     url = f'https://github.com/SagerNet/sing-box/releases/download/v{CORE_VERSION}/{name}.tar.gz'
-    # curl has a total timeout and bounded retries; no shell evaluation.
-    run(['curl', '-fsSL', '--retry', '2', '--connect-timeout', '15', '--max-time', '180', url, '-o', archive], timeout=600)
+    download(url, archive)
     digest = hashlib.sha256()
     with archive.open('rb') as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b''):
             digest.update(chunk)
     if digest.hexdigest() != CORE_HASHES[variant]:
+        archive.unlink(missing_ok=True)
         raise Error('核心 SHA-256 校验失败，未安装。')
     binary = directory / 'sing-box'
     with tarfile.open(archive, 'r:gz') as tar:
@@ -828,7 +872,7 @@ def install(staged_core, staged_manager, system):
     marker = LIB / '.linkbox-owned'
     paths = (ROOT, LIB, LAUNCHER, system.unit)
     if any(p.exists() for p in paths) and not marker.exists():
-        raise Error('发现同名文件但没有 LinkBox 安装标记，未覆盖。')
+        raise Error('发现同名文件但没有 LINKBOX 安装标记，未覆盖。')
     output = run([staged_core, 'version']).stdout
     if not re.search(r'^sing-box version ' + re.escape(CORE_VERSION) + r'\s*$', output, re.M):
         raise Error('核心版本核验失败。')
@@ -843,7 +887,7 @@ def install(staged_core, staged_manager, system):
     files = {CORE: (Path(staged_core).read_bytes(), 0o700), LIB / 'linkbox.py': (Path(staged_manager).read_bytes(), 0o700),
              LAUNCHER: (b'#!/bin/sh\nexec python3 /usr/local/lib/linkbox/linkbox.py "$@"\n', 0o755),
              system.unit: (system.definition().encode(), 0o644 if system.manager == 'systemd' else 0o755),
-             marker: (b'LinkBox 1\n', 0o600)}
+             marker: (b'LINKBOX 1\n', 0o600)}
     backup = {p: (p.read_bytes(), p.stat().st_mode & 0o777) if p.exists() else None for p in files}
     was_active = system.active()
     try:
