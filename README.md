@@ -14,7 +14,7 @@
 
 ```sh
 (
-  installer_url='https://raw.githubusercontent.com/aoomee/linkbox/b2610ddb2f2678135922dc79e238b301a9bec432/install.sh'
+  installer_url='https://raw.githubusercontent.com/aoomee/linkbox/51ed6c4f8631774283001cd9c4c53d3f010ff198/install.sh'
   installer_file=$(mktemp) || exit 1
   trap 'rm -f "$installer_file"' 0 HUP INT TERM
   if command -v wget >/dev/null 2>&1; then
